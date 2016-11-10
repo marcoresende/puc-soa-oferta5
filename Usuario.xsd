@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+	targetNamespace="http://pucminas.br/MC/Usuario"
+	xmlns:tns="http://pucminas.br/MC/Usuario" 
+	elementFormDefault="qualified">
+	
+	<element name="usuario" type="tns:Usuario"></element>
+	
+	<complexType name="Usuario">
+		<sequence>
+			<element name="id" type="integer"/>
+			<element name="nome" type="string"/>
+		</sequence>
+	</complexType>
+	
+</schema>

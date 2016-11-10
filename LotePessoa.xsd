@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="http://pucminas.br/MC/SOA/Marco"
+	xmlns:tns="http://pucminas.br/MC/SOA/Marco"
+	elementFormDefault="qualified">
+
+
+	<include schemaLocation="Pessoa.xsd"></include>
+	<complexType name="LotePessoa">
+		<sequence>
+			<element name="id" type="integer"></element>
+			<element name="pessoa" type="tns:Pessoa" minOccurs="1" maxOccurs="unbounded"></element>
+		</sequence>
+	</complexType>
+
+</schema>

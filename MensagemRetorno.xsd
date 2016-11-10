@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://pucminas.br/MC/SOA/Marco"
+	xmlns:tns="http://pucminas.br/MC/SOA/Marco" elementFormDefault="qualified">
+
+	<element name="mensagemPessoa" type="tns:MensagemRetorno"></element>
+
+	<complexType name="MensagemRetorno">
+		<sequence>
+			<element name="codigo" type="integer"/>
+			<element name="descricao" type="string"/>
+			<element name="isAtivo" type="boolean"/>
+		</sequence>	
+	</complexType>
+
+</schema>

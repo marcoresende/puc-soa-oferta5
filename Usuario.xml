@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tns:usuario xmlns:tns="http://pucminas.br/MC/Usuario" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pucminas.br/MC/Usuario Usuario.xsd ">
+  <tns:id>0</tns:id>
+  <tns:nome>tns:nome</tns:nome>
+</tns:usuario>

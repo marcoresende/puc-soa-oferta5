@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml-fragment xmlns:ser="http://www.bea.com/wli/sb/services" xmlns:tran="http://www.bea.com/wli/sb/transports" xmlns:env="http://www.bea.com/wli/config/env" xmlns:http="http://www.bea.com/wli/sb/transports/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:con="http://www.bea.com/wli/sb/pipeline/config" xmlns:con1="http://www.bea.com/wli/sb/stages/transform/config" xmlns:con2="http://www.bea.com/wli/sb/stages/config">
+  <ser:coreEntry isProxy="true" isEnabled="true">
+    <ser:binding type="SOAP" isSoap12="false" xsi:type="con:SoapBindingType" xmlns:con="http://www.bea.com/wli/sb/services/bindings/config">
+      <con:wsdl ref="OSB_MarcoResende/EBS/Credito/wsdl/CreditoService"/>
+      <con:port>
+        <con:name>CreditoServiceSOAP</con:name>
+        <con:namespace>http://pucminas.br/SN/CreditoService/MarcoResende</con:namespace>
+      </con:port>
+      <con:selector type="SOAP body"/>
+    </ser:binding>
+    <ser:monitoring isEnabled="false">
+      <ser:aggregationInterval>10</ser:aggregationInterval>
+      <ser:pipelineMonitoringLevel>Pipeline</ser:pipelineMonitoringLevel>
+    </ser:monitoring>
+    <ser:reporting>true</ser:reporting>
+    <ser:logging isEnabled="true">
+      <ser:logLevel>debug</ser:logLevel>
+    </ser:logging>
+    <ser:sla-alerting isEnabled="true">
+      <ser:alertLevel>normal</ser:alertLevel>
+    </ser:sla-alerting>
+    <ser:pipeline-alerting isEnabled="true">
+      <ser:alertLevel>normal</ser:alertLevel>
+    </ser:pipeline-alerting>
+    <ser:ws-policy>
+      <ser:binding-mode>wsdl-policy-attachments</ser:binding-mode>
+    </ser:ws-policy>
+  </ser:coreEntry>
+  <ser:endpointConfig>
+    <tran:provider-id>http</tran:provider-id>
+    <tran:inbound>true</tran:inbound>
+    <tran:URI>
+      <env:value>/ServicosNegocio/Credito/CreditoGeralService</env:value>
+    </tran:URI>
+    <tran:inbound-properties/>
+    <tran:all-headers>false</tran:all-headers>
+    <tran:provider-specific>
+      <http:inbound-properties/>
+    </tran:provider-specific>
+  </ser:endpointConfig>
+  <ser:router>
+    <con:pipeline type="request" name="PipelinePairOperacaoInexistente_request">
+      <con:stage name="stageOperacaoInexistente" xmlns:con3="http://www.bea.com/wli/sb/stages/routing/config">
+        <con:context/>
+        <con:actions>
+          <con1:Error>
+            <con2:id>_ActionId-2286697815218958950--4644c6c3.15888e74fa2.-7fac</con2:id>
+            <con1:errCode>001</con1:errCode>
+            <con1:message>Operação Inexistente</con1:message>
+          </con1:Error>
+        </con:actions>
+      </con:stage>
+    </con:pipeline>
+    <con:pipeline type="response" name="PipelinePairOperacaoInexistente_response"/>
+    <con:pipeline type="request" name="PipelineVerificaCreditoExterno_request">
+      <con:stage name="stageCreditoExterno">
+        <con:context/>
+        <con:actions>
+          <con1:wsCallout>
+            <con2:id>_ActionId-2286697815218958950--4644c6c3.15888e74fa2.-7f65</con2:id>
+            <con1:service xsi:type="ref:ProxyRef" ref="OSB_MarcoResende/ServicosNegocio/Credito/Services/Proxies/Operations/verificaCreditoExternoService" xmlns:ref="http://www.bea.com/wli/sb/reference"/>
+            <con1:operation>verificaCreditoExterno</con1:operation>
+            <con1:request>
+              <con1:body wrapped="false">$CreditoExternoRequest</con1:body>
+            </con1:request>
+            <con1:response>
+              <con1:body wrapped="false">CreditoExternoResponse</con1:body>
+            </con1:response>
+            <con1:requestTransform/>
+            <con1:responseTransform/>
+          </con1:wsCallout>
+        </con:actions>
+      </con:stage>
+    </con:pipeline>
+    <con:pipeline type="response" name="PipelineVerificaCreditoExterno_response"/>
+    <con:flow>
+      <con:branch-node type="operation" name="BranchNodeCreditoGeralService">
+        <con:context/>
+        <con:branch-table>
+          <con:branch name="verificaCreditoExterno">
+            <con:operator>equals</con:operator>
+            <con:value/>
+            <con:flow>
+              <con:pipeline-node name="PipelineVerificaCreditoExterno">
+                <con:request>PipelineVerificaCreditoExterno_request</con:request>
+                <con:response>PipelineVerificaCreditoExterno_response</con:response>
+              </con:pipeline-node>
+            </con:flow>
+          </con:branch>
+          <con:branch name="verificaCreditoInterno">
+            <con:operator>equals</con:operator>
+            <con:value/>
+            <con:flow/>
+          </con:branch>
+          <con:branch name="verificaWhiteList">
+            <con:operator>equals</con:operator>
+            <con:value/>
+            <con:flow/>
+          </con:branch>
+          <con:default-branch>
+            <con:flow>
+              <con:pipeline-node name="PipelinePairOperacaoInexistente">
+                <con:request>PipelinePairOperacaoInexistente_request</con:request>
+                <con:response>PipelinePairOperacaoInexistente_response</con:response>
+              </con:pipeline-node>
+            </con:flow>
+          </con:default-branch>
+        </con:branch-table>
+      </con:branch-node>
+    </con:flow>
+  </ser:router>
+</xml-fragment>

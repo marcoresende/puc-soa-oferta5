@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml-fragment xmlns:ser="http://www.bea.com/wli/sb/services" xmlns:tran="http://www.bea.com/wli/sb/transports" xmlns:env="http://www.bea.com/wli/config/env" xmlns:http="http://www.bea.com/wli/sb/transports/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:con="http://www.bea.com/wli/sb/pipeline/config" xmlns:con1="http://www.bea.com/wli/sb/stages/config" xmlns:con2="http://www.bea.com/wli/sb/stages/transform/config" xmlns:con3="http://www.bea.com/wli/sb/stages/routing/config">
+  <ser:coreEntry isProxy="true" isEnabled="true">
+    <ser:binding type="SOAP" isSoap12="false" xsi:type="con:SoapBindingType" xmlns:con="http://www.bea.com/wli/sb/services/bindings/config">
+      <con:wsdl ref="OSB_MarcoResende/EBS/Pessoa/wsdl/PessoaService"/>
+      <con:port>
+        <con:name>PessoaServiceSOAP</con:name>
+        <con:namespace>http://pucminas.br/SN/PessoaService/MarcoResende</con:namespace>
+      </con:port>
+      <con:selector type="SOAP body"/>
+    </ser:binding>
+    <ser:monitoring isEnabled="false">
+      <ser:aggregationInterval>10</ser:aggregationInterval>
+      <ser:pipelineMonitoringLevel>Pipeline</ser:pipelineMonitoringLevel>
+    </ser:monitoring>
+    <ser:reporting>true</ser:reporting>
+    <ser:logging isEnabled="true">
+      <ser:logLevel>debug</ser:logLevel>
+    </ser:logging>
+    <ser:sla-alerting isEnabled="true">
+      <ser:alertLevel>normal</ser:alertLevel>
+    </ser:sla-alerting>
+    <ser:pipeline-alerting isEnabled="true">
+      <ser:alertLevel>normal</ser:alertLevel>
+    </ser:pipeline-alerting>
+    <ser:ws-policy>
+      <ser:binding-mode>wsdl-policy-attachments</ser:binding-mode>
+    </ser:ws-policy>
+  </ser:coreEntry>
+  <ser:endpointConfig>
+    <tran:provider-id>http</tran:provider-id>
+    <tran:inbound>true</tran:inbound>
+    <tran:URI>
+      <env:value>/ServicosNegocio/Pessoa/BuscaPessoaService</env:value>
+    </tran:URI>
+    <tran:inbound-properties/>
+    <tran:all-headers>false</tran:all-headers>
+    <tran:provider-specific>
+      <http:inbound-properties/>
+    </tran:provider-specific>
+  </ser:endpointConfig>
+  <ser:router>
+    <con:pipeline type="request" name="PipelinePairOperacaoInexistente_request">
+      <con:stage name="stageOperacaoInexistente" xmlns:con1="http://www.bea.com/wli/sb/stages/transform/config" xmlns:con2="http://www.bea.com/wli/sb/stages/config">
+        <con:context/>
+        <con:actions>
+          <con1:Error xmlns:con4="http://www.bea.com/wli/sb/stages/transform/config">
+            <con2:id>_ActionId-2286697815218958950--4644c6c3.15888e74fa2.-7f45</con2:id>
+            <con1:errCode>001</con1:errCode>
+            <con1:message>Operação Inexistente</con1:message>
+          </con1:Error>
+        </con:actions>
+      </con:stage>
+    </con:pipeline>
+    <con:pipeline type="response" name="PipelinePairOperacaoInexistente_response"/>
+    <con:pipeline type="request" name="PipelinePairNodeBuscaPessoa_request">
+      <con:stage name="stageValidacaoRequest">
+        <con:context>
+          <con1:varNsDecl namespace="http://pucminas.br/SN/Pessoa" prefix="pes"/>
+        </con:context>
+        <con:actions>
+          <con2:validate>
+            <con1:id>_ActionId-2286697815218958950--4644c6c3.15888e74fa2.-7edc</con1:id>
+            <con2:schema ref="OSB_MarcoResende/EBS/Pessoa/xsd/ParametrosPessoa"/>
+            <con2:schemaElement xmlns:pes="http://pucminas.br/SN/Pessoa">pes:parametrosBuscaPessoa</con2:schemaElement>
+            <con2:varName>body</con2:varName>
+            <con2:location>
+              <con1:xpathText>./pes:parametrosBuscaPessoa</con1:xpathText>
+            </con2:location>
+          </con2:validate>
+        </con:actions>
+      </con:stage>
+    </con:pipeline>
+    <con:pipeline type="response" name="PipelinePairNodeBuscaPessoa_response"/>
+    <con:flow>
+      <con:branch-node type="operation" name="BranchNode1">
+        <con:context/>
+        <con:branch-table>
+          <con:branch name="buscaPessoa">
+            <con:operator>equals</con:operator>
+            <con:value/>
+            <con:flow>
+              <con:pipeline-node name="PipelinePairNodeBuscaPessoa">
+                <con:request>PipelinePairNodeBuscaPessoa_request</con:request>
+                <con:response>PipelinePairNodeBuscaPessoa_response</con:response>
+              </con:pipeline-node>
+              <con:route-node name="RouteNodeBuscaPessoa1">
+                <con:context/>
+                <con:actions>
+                  <con3:route>
+                    <con1:id>_ActionId-2286697815218958950--4644c6c3.15888e74fa2.-7ec3</con1:id>
+                    <con3:service ref="OSB_MarcoResende/ServicosNegocio/Pessoa/Service/Business/BuscaPessoaBusinessService" xsi:type="ref:BusinessServiceRef" xmlns:ref="http://www.bea.com/wli/sb/reference"/>
+                    <con3:operation>buscaPessoa</con3:operation>
+                    <con3:outboundTransform/>
+                    <con3:responseTransform/>
+                  </con3:route>
+                </con:actions>
+              </con:route-node>
+            </con:flow>
+          </con:branch>
+          <con:default-branch>
+            <con:flow>
+              <con:pipeline-node name="PipelinePairOperacaoInexistente">
+                <con:request>PipelinePairOperacaoInexistente_request</con:request>
+                <con:response>PipelinePairOperacaoInexistente_response</con:response>
+              </con:pipeline-node>
+            </con:flow>
+          </con:default-branch>
+        </con:branch-table>
+      </con:branch-node>
+    </con:flow>
+  </ser:router>
+</xml-fragment>

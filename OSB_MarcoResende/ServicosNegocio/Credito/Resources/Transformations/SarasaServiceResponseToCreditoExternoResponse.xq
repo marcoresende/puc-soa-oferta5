@@ -13,6 +13,7 @@ declare function xf:SarasaServiceResponseToCreditoExternoResponse($resultadoSera
                 <ns2:pessoa>
                     <ns2:cnpj>{ data($resultadoSerasa1/ns0:num_documento) }</ns2:cnpj>
                 </ns2:pessoa>
+                <ns2:situacao>{ fn:round($resultadoSerasa1/ns0:valor_restricao) }</ns2:situacao>
             </ns1:credito>
         </ns1:resultadoVerificaCreditoExterno>
 };

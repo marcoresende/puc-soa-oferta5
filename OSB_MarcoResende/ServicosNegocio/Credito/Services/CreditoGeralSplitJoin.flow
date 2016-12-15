@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpel:process name="CreditoGeralSplitJoin"
+              targetNamespace="http://www.example.com/flow/OSB_MarcoResende/ServicosNegocio/Credito/Services/CreditoGeralSplitJoin"
+              xmlns:tns="http://www.example.com/flow/OSB_MarcoResende/ServicosNegocio/Credito/Services/CreditoGeralSplitJoin"
+              xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+              xmlns:rescon="http://www.bea.com/alsb/flow/resources/config"
+              xmlns:bea="http://www.bea.com/bpel/ui/extensions"
+              xmlns:ext="http://www.bea.com/bpel/extensions"
+              xmlns:expr="http://www.bea.com/wli/sb/stages/config"
+              xmlns:trf="http://www.bea.com/wli/sb/stages/transform/config"
+              xmlns:bind="http://pucminas.br/SN/Credito" 
+              bea:name="CreditoGeralSplitJoin" xmlns:ns1="http://pucminas.br/SN/CreditoService/MarcoResende" xmlns:ns0="http://cursosoa.org/CreditLegacyService/">
+    <bpel:partnerLinks>
+        <bpel:partnerLink name="CreditoGeralSplitJoin" partnerLinkType="tns:CreditoGeralSplitJoin"
+                          myRole="CreditoGeralSplitJoin">
+	       </bpel:partnerLink>
+	   <bpel:partnerLink name="verificaCreditoExternoService"
+		partnerLinkType="tns:verificaCreditoExternoService_plnkType"
+		partnerRole="verificaCreditoExternoService_PartnerRole">
+	   </bpel:partnerLink>
+	   <bpel:partnerLink name="VerificaWhiteListService"
+	   	partnerLinkType="tns:VerificaWhiteListService_plnkType"
+	   	partnerRole="VerificaWhiteListService_PartnerRole">
+	   </bpel:partnerLink>
+	   <bpel:partnerLink name="CreditLegacyProxyService"
+	   	partnerLinkType="tns:CreditLegacyProxyService_plnkType"
+	   	partnerRole="CreditLegacyProxyService_PartnerRole">
+	   </bpel:partnerLink></bpel:partnerLinks>
+
+	   <bpel:variables>
+        <bpel:variable name="request"
+	                      messageType="bind:verificaCreditoGeralRequest">
+	       </bpel:variable>
+	       <bpel:variable name="response"
+                       messageType="bind:verificaCreditoGeralResponse">
+	       </bpel:variable>
+    <bpel:variable name="varCreditoExternoResponse"
+		messageType="ns1:verificaCreditoExternoResponse">
+    </bpel:variable>
+    <bpel:variable name="varCreditoExternoRequest"
+    	messageType="ns1:verificaCreditoExternoRequest">
+    </bpel:variable>
+    <bpel:variable name="verificaWhiteListRequest"
+    	messageType="ns1:verificaWhiteListRequest">
+    </bpel:variable>
+    <bpel:variable name="verificaWhiteListResponse"
+    	messageType="ns1:verificaWhiteListResponse">
+    </bpel:variable>
+    <bpel:variable name="verificaCreditoInternoRequest"
+    	messageType="ns0:CreditLegacyequest">
+    </bpel:variable>
+    <bpel:variable name="verificaCreditoInternoReponse"
+    	messageType="ns0:CreditLegacyResponse">
+    </bpel:variable></bpel:variables>
+
+    <bpel:sequence>
+        <bpel:receive partnerLink="CreditoGeralSplitJoin" operation="verificaCreditoGeral" variable="request" createInstance="yes">
+	           <rescon:receiveInfo>
+                <rescon:wsdl ref="OSB_MarcoResende/EBS/Credito/wsdl/CreditoGeralService" binding="bind:CreditoGeralServiceSOAP"/>
+            </rescon:receiveInfo>
+        </bpel:receive>
+        <bpel:flow>
+        	<bpel:scope bea:name="ScopeVerificaCreditoExterno">
+        		<bpel:sequence>
+        			<bpel:assign>
+        				<bpel:extensionAssignOperation>
+        					<trf:assign varName="varCreditoExternoRequest.parameters">
+        						<trf:expr>
+        							<expr:xqueryText>$request.parameters</expr:xqueryText></trf:expr></trf:assign>
+        				</bpel:extensionAssignOperation>
+        			</bpel:assign>
+        			<bpel:invoke operation="verificaCreditoExterno" partnerLink="verificaCreditoExternoService" outputVariable="varCreditoExternoResponse" inputVariable="varCreditoExternoRequest">
+        				<rescon:invokeInfo>
+        					<rescon:service isProxy="true" ref="OSB_MarcoResende/ServicosNegocio/Credito/Services/Proxies/Operations/verificaCreditoExternoService"></rescon:service></rescon:invokeInfo></bpel:invoke></bpel:sequence>
+        	</bpel:scope>
+        	
+        <bpel:scope bea:name="ScopeVerificaWhiteList">
+		<bpel:sequence>
+			<bpel:assign>
+				<bpel:extensionAssignOperation>
+					<trf:assign
+						varName="verificaWhiteListRequest.parameters">
+						<trf:expr>
+							<expr:xqueryText>$request.parameters</expr:xqueryText></trf:expr></trf:assign></bpel:extensionAssignOperation></bpel:assign>
+			<bpel:invoke operation="verificaWhiteList" partnerLink="VerificaWhiteListService" inputVariable="verificaWhiteListRequest" outputVariable="verificaWhiteListResponse">
+				<rescon:invokeInfo>
+					<rescon:service isProxy="true" ref="OSB_MarcoResende/ServicosNegocio/Credito/Services/Proxies/Operations/VerificaWhiteListService"></rescon:service></rescon:invokeInfo></bpel:invoke></bpel:sequence>
+        </bpel:scope>
+        <bpel:scope bea:name="ScopeVerificaCreditoInterno">
+        	<bpel:sequence>
+        		<bpel:assign>
+        			<bpel:extensionAssignOperation>
+        				<trf:assign varName="verificaCreditoInternoRequest.ParametrosCreditLegacy">
+        					<trf:expr>
+        						<expr:xqueryText>$request.parameters</expr:xqueryText></trf:expr></trf:assign>
+        			</bpel:extensionAssignOperation>
+        		</bpel:assign>
+        		<bpel:invoke operation="ConsultarCreditLegacy" partnerLink="CreditLegacyProxyService" inputVariable="verificaCreditoInternoRequest" outputVariable="verificaCreditoInternoReponse">
+        			<rescon:invokeInfo>
+        				<rescon:service isProxy="true" ref="OSB_MarcoResende/ServicosNegocio/Credito/Services/Proxies/CreditLegacyProxyService"></rescon:service></rescon:invokeInfo></bpel:invoke></bpel:sequence>
+        </bpel:scope></bpel:flow>
+        <bpel:assign>
+        	<bpel:extensionAssignOperation>
+        		<trf:assign varName="response.parameters">
+        			<trf:expr>
+        				<expr:xqueryTransform>
+        					<expr:resource ref="OSB_MarcoResende/ServicosNegocio/Credito/Resources/Transformations/resultadoCreditoExternoToCreditoGeralService"></expr:resource>
+        					<expr:param name="credito1">
+        						<expr:path>$varCreditoExternoResponse.parameters</expr:path></expr:param></expr:xqueryTransform></trf:expr></trf:assign>
+        	</bpel:extensionAssignOperation>
+        </bpel:assign>
+        <bpel:assign>
+        	<bpel:extensionAssignOperation>
+        		<trf:replace contents-only="false" varName="response.parameters">
+        			<trf:location>
+        				<expr:xpathText>.</expr:xpathText></trf:location>
+        			<trf:expr>
+        				<expr:xqueryTransform>
+        					<expr:resource ref="OSB_MarcoResende/ServicosNegocio/Credito/Resources/Transformations/resultadoVerificaCreditoExternoToCreditoGeralService"></expr:resource>
+        					<expr:param name="resultadoVerificaCreditoExterno1">
+        						<expr:path>$varCreditoExternoResponse.parameters</expr:path></expr:param></expr:xqueryTransform></trf:expr></trf:replace>
+        	</bpel:extensionAssignOperation>
+        </bpel:assign>
+        <bpel:reply partnerLink="CreditoGeralSplitJoin" operation="verificaCreditoGeral" variable="response"></bpel:reply>
+    </bpel:sequence>
+</bpel:process>

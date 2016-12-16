@@ -13,7 +13,22 @@ declare function xf:SarasaServiceResponseToCreditoExternoResponse($resultadoSera
                 <ns2:pessoa>
                     <ns2:cnpj>{ data($resultadoSerasa1/ns0:num_documento) }</ns2:cnpj>
                 </ns2:pessoa>
-                <ns2:situacao>{ fn:round($resultadoSerasa1/ns0:valor_restricao) }</ns2:situacao>
+                <ns2:indicaCreditoExterno>
+                    {
+                        if (data($resultadoSerasa1/ns0:valor_restricao) > 400.0) then
+                            (xs:boolean("true"))
+                        else 
+                            xs:boolean("false")
+                    }
+</ns2:indicaCreditoExterno>
+                <ns2:situacao>
+                    {
+                        if ($resultadoSerasa1/ns0:valor_restricao > 400.0) then
+                            (200)
+                        else 
+                            0
+                    }
+</ns2:situacao>
             </ns1:credito>
         </ns1:resultadoVerificaCreditoExterno>
 };

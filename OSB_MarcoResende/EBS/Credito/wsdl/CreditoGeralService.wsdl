@@ -7,6 +7,7 @@ name="CreditoGeralService" targetNamespace="http://pucminas.br/SN/Credito">
   <wsdl:types>
 	<xsd:schema targetNamespace="http://pucminas.br/SN/Credito"> 
     	<xsd:import namespace="http://pucminas.br/MC/SOA/MarcoResende" schemaLocation="../../../ModeloCanonico/MC/Pessoa.xsd" />
+    	<xsd:import namespace="http://pucminas.br/MC/SOA/MarcoResende" schemaLocation="../../../ModeloCanonico/MC/Credito.xsd" />
 		<xsd:import namespace="http://pucminas.br/MC/SOA/MarcoResende" schemaLocation="../../../ModeloCanonico/MC/PucminasFault.xsd" />
 
       <xsd:element name="parametrosCreditoGeralRequest">
@@ -20,7 +21,7 @@ name="CreditoGeralService" targetNamespace="http://pucminas.br/SN/Credito">
       <xsd:element name="parametrosCreditoGeralResponse">
         <xsd:complexType>
           <xsd:sequence>
-            <xsd:element name="score" type="xsd:integer"/>
+            <xsd:element name="credito" type="cab:Credito"/>
           </xsd:sequence>
         </xsd:complexType>
       </xsd:element>

@@ -1,1 +1,2 @@
-# puc-soa-oferta5
+# Trabalho Final - Arquitetura Orientada a Serviços (SOA)
+### Alunos: Marco Túlio T. Resende e João Paulo Sodré

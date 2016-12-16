@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+	targetNamespace="http://pucminas.br/MC/SOA/MarcoResende" xmlns:tns="http://pucminas.br/MC/SOA/MarcoResende" elementFormDefault="qualified">
+	
+	<complexType name="Restricoes">
+		<sequence>
+			<element name="quantidade" type="integer"/>
+			<element name="valorTotal" type="double"/>
+		</sequence>	
+	</complexType>
+	
+</schema>

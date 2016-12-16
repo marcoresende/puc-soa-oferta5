@@ -9,7 +9,11 @@
               xmlns:expr="http://www.bea.com/wli/sb/stages/config"
               xmlns:trf="http://www.bea.com/wli/sb/stages/transform/config"
               xmlns:bind="http://pucminas.br/SN/Credito" 
-              bea:name="CreditoGeralSplitJoin" xmlns:ns1="http://pucminas.br/SN/CreditoService/MarcoResende" xmlns:ns0="http://cursosoa.org/CreditLegacyService/">
+              bea:name="CreditoGeralSplitJoin" xmlns:ns1="http://pucminas.br/SN/CreditoService/MarcoResende" xmlns:ns0="http://cursosoa.org/CreditLegacyService/" xmlns:mar="http://pucminas.br/MC/SOA/MarcoResende" xmlns:ns2="http://creditlegacy.com.br/SN/CreditLegacy">
+    <rescon:importInfo>
+    	<rescon:schema-import
+    		ref="OSB_MarcoResende/ModeloCanonico/MC/Restricoes">
+    	</rescon:schema-import></rescon:importInfo>
     <bpel:partnerLinks>
         <bpel:partnerLink name="CreditoGeralSplitJoin" partnerLinkType="tns:CreditoGeralSplitJoin"
                           myRole="CreditoGeralSplitJoin">
@@ -49,8 +53,7 @@
     <bpel:variable name="verificaCreditoInternoRequest"
     	messageType="ns0:CreditLegacyequest">
     </bpel:variable>
-    <bpel:variable name="verificaCreditoInternoReponse"
-    	messageType="ns0:CreditLegacyResponse">
+    <bpel:variable name="verificaCreditoInternoReponse" messageType="ns0:CreditLegacyResponse">
     </bpel:variable></bpel:variables>
 
     <bpel:sequence>
@@ -71,7 +74,8 @@
         			</bpel:assign>
         			<bpel:invoke operation="verificaCreditoExterno" partnerLink="verificaCreditoExternoService" outputVariable="varCreditoExternoResponse" inputVariable="varCreditoExternoRequest">
         				<rescon:invokeInfo>
-        					<rescon:service isProxy="true" ref="OSB_MarcoResende/ServicosNegocio/Credito/Services/Proxies/Operations/verificaCreditoExternoService"></rescon:service></rescon:invokeInfo></bpel:invoke></bpel:sequence>
+        					<rescon:service isProxy="true" ref="OSB_MarcoResende/ServicosNegocio/Credito/Services/Proxies/Operations/verificaCreditoExternoService"></rescon:service></rescon:invokeInfo></bpel:invoke>
+        			</bpel:sequence>
         	</bpel:scope>
         	
         <bpel:scope bea:name="ScopeVerificaWhiteList">
@@ -87,6 +91,7 @@
 					<rescon:service isProxy="true" ref="OSB_MarcoResende/ServicosNegocio/Credito/Services/Proxies/Operations/VerificaWhiteListService"></rescon:service></rescon:invokeInfo></bpel:invoke></bpel:sequence>
         </bpel:scope>
         <bpel:scope bea:name="ScopeVerificaCreditoInterno">
+        	
         	<bpel:sequence>
         		<bpel:assign>
         			<bpel:extensionAssignOperation>
@@ -97,30 +102,36 @@
         		</bpel:assign>
         		<bpel:invoke operation="ConsultarCreditLegacy" partnerLink="CreditLegacyProxyService" inputVariable="verificaCreditoInternoRequest" outputVariable="verificaCreditoInternoReponse">
         			<rescon:invokeInfo>
-        				<rescon:service isProxy="true" ref="OSB_MarcoResende/ServicosNegocio/Credito/Services/Proxies/CreditLegacyProxyService"></rescon:service></rescon:invokeInfo></bpel:invoke></bpel:sequence>
+        				<rescon:service isProxy="true" ref="OSB_MarcoResende/ServicosNegocio/Credito/Services/Proxies/CreditLegacyProxyService"></rescon:service></rescon:invokeInfo></bpel:invoke>
+        		<bpel:assign>
+        			<bpel:extensionAssignOperation>
+        				<trf:replace contents-only="false" varName="verificaCreditoInternoReponse.ResultadoCreditLegacy">
+        					<trf:location>
+        						<expr:xpathText>.</expr:xpathText></trf:location>
+        					<trf:expr>
+        						<expr:xqueryTransform>
+        							<expr:resource ref="OSB_MarcoResende/ServicosNegocio/Credito/Resources/Transformations/CreditLegacyReponseToRestricoes"></expr:resource>
+        							<expr:param name="resultadoCreditLegacy1">
+        								<expr:path>$verificaCreditoInternoReponse.ResultadoCreditLegacy</expr:path></expr:param></expr:xqueryTransform></trf:expr></trf:replace>
+        			</bpel:extensionAssignOperation>
+        		</bpel:assign></bpel:sequence>
         </bpel:scope></bpel:flow>
+        
         <bpel:assign>
-        	<bpel:extensionAssignOperation>
-        		<trf:assign varName="response.parameters">
-        			<trf:expr>
-        				<expr:xqueryTransform>
-        					<expr:resource ref="OSB_MarcoResende/ServicosNegocio/Credito/Resources/Transformations/resultadoCreditoExternoToCreditoGeralService"></expr:resource>
-        					<expr:param name="credito1">
-        						<expr:path>$varCreditoExternoResponse.parameters</expr:path></expr:param></expr:xqueryTransform></trf:expr></trf:assign>
-        	</bpel:extensionAssignOperation>
-        </bpel:assign>
-        <bpel:assign>
-        	<bpel:extensionAssignOperation>
-        		<trf:replace contents-only="false" varName="response.parameters">
-        			<trf:location>
-        				<expr:xpathText>.</expr:xpathText></trf:location>
-        			<trf:expr>
-        				<expr:xqueryTransform>
-        					<expr:resource ref="OSB_MarcoResende/ServicosNegocio/Credito/Resources/Transformations/resultadoVerificaCreditoExternoToCreditoGeralService"></expr:resource>
-        					<expr:param name="resultadoVerificaCreditoExterno1">
-        						<expr:path>$varCreditoExternoResponse.parameters</expr:path></expr:param></expr:xqueryTransform></trf:expr></trf:replace>
-        	</bpel:extensionAssignOperation>
-        </bpel:assign>
+        	<bpel:copy>
+        		<bpel:from variable="varCreditoExternoResponse" part="parameters"></bpel:from>
+        		<bpel:to variable="response" part="parameters"></bpel:to>
+        	</bpel:copy>
+        
+	</bpel:assign>
+        
+        
+        
+        
+        
+        
+        
+        
         <bpel:reply partnerLink="CreditoGeralSplitJoin" operation="verificaCreditoGeral" variable="response"></bpel:reply>
     </bpel:sequence>
 </bpel:process>

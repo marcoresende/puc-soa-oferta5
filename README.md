@@ -1,2 +1,4 @@
 # Trabalho Final - Arquitetura Orientada a Serviços (SOA)
-### Alunos: Marco Túlio T. Resende e João Paulo Sodré
+### Alunos
+###João Paulo Sodré
+### Marco Túlio T. Resende

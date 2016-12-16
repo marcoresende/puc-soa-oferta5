@@ -132,6 +132,8 @@
         
         
         
+        
+        
         <bpel:reply partnerLink="CreditoGeralSplitJoin" operation="verificaCreditoGeral" variable="response"></bpel:reply>
     </bpel:sequence>
 </bpel:process>

@@ -21,6 +21,8 @@ declare function xf:SarasaServiceResponseToCreditoExternoResponse($resultadoSera
                             xs:boolean("false")
                     }
 </ns2:indicaCreditoExterno>
+                <ns2:indicaCreditoInterno>{ xs:boolean("false") }</ns2:indicaCreditoInterno>
+                <ns2:indicaWhiteList>{ xs:boolean("false") }</ns2:indicaWhiteList>
                 <ns2:situacao>
                     {
                         if ($resultadoSerasa1/ns0:valor_restricao > 400.0) then
